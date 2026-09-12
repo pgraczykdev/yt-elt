@@ -1,5 +1,5 @@
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from pycopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor
 
 table_name = "video_tbl"
 
@@ -54,11 +54,9 @@ def create_table(schema_name):
 
     close_conn_cursor(conn, cursor)
 
-def get_video_ids(schema_name):
-    conn, cursor = get_conn_cursor()
+def get_video_ids(cursor, schema_name):
     query = f"SELECT video_id FROM {schema_name}.{table_name};"
     cursor.execute(query)
     ids = cursor.fetchall()
     video_ids = [row['video_id'] for row in ids]
-    close_conn_cursor(conn, cursor)
     return video_ids

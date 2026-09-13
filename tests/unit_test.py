@@ -23,12 +23,12 @@ def test_dags_integrity(dag_bag):
         assert dag_id in loaded_dags, f"DAG '{dag_id}' is missing from the loaded DAGs"
 
     #3
-    assert dag_bag.size() == 3, f"Expected 3 DAGs, but found {dag_bag.size}"
+    assert dag_bag.size() == 3, f"Expected 3 DAGs, but found {dag_bag.size()}"
 
     #4
     expected_task_counts = {
-        "produce_json": 4, 
-        "update_db": 2,
+        "produce_json": 5, 
+        "update_db": 3,
         "data_quality": 2
     }
     for dag_id, dag in dag_bag.dags.items():

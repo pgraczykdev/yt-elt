@@ -30,7 +30,7 @@ with DAG(
     dag_id='produce_json',
     default_args=default_args,
     description='A DAG to produce JSON data from YouTube API',
-    schedule_interval='0 0 * * *',  # Run daily at midnight,
+    schedule='0 0 * * *',  # Run daily at midnight,
     catchup=False,
 ) as dag:
     # Define the tasks in the DAG
@@ -46,16 +46,12 @@ with DAG(
     dag_id='update_db',
     default_args=default_args,
     description='DAG to process JSON files and update the database',
-    schedule_interval='0 15 * * *', 
+    schedule='0 15 * * *', 
     catchup=False,
 ) as dag:
     # Define the tasks in the DAG
     update_staging = staging_table()
     update_core = core_table()
-    playlist_id = get_playlist_id()
-    video_ids = get_video_ids(playlist_id)
-    extracted_data = extract_video_data(video_ids)
-    save_to_json_task = save_to_json(extracted_data)
 
     # Set task dependencies
     update_staging >> update_core 
@@ -64,7 +60,7 @@ with DAG(
     dag_id='data_quality',
     default_args=default_args,
     description='DAG to run data quality checks using Soda',
-    schedule_interval='0 16 * * *',  
+    schedule='0 16 * * *',  
     catchup=False,
 ) as dag:
     # Define the tasks in the DAG

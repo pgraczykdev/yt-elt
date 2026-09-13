@@ -2,6 +2,7 @@ from airflow import DAG
 import pendulum
 from datetime import datetime, timedelta 
 from api.video_stats import get_playlist_id, get_video_ids, extract_video_data, save_to_json
+from dataquality.soda import yt_elt_data_quality
 
 from datawarehouse.dwh import staging_table, core_table
 
@@ -21,6 +22,9 @@ default_args = {
     'start_date': datetime(2026, 1, 1, tzinfo=local_tz),
     #'end_date': datetime(2026, 1, 2, tzinfo=local_tz),
 }
+staging_schema = "staging"
+core_schema = "core"
+
 
 with DAG(
     dag_id='produce_json',
@@ -38,13 +42,11 @@ with DAG(
     # Set task dependencies
     playlist_id >> video_ids >> extracted_data >> save_to_json_task
 
-
-
 with DAG(
     dag_id='update_db',
     default_args=default_args,
     description='DAG to process JSON files and update the database',
-    schedule_interval='0 15 * * *',  # Run daily at midnight,
+    schedule_interval='0 15 * * *', 
     catchup=False,
 ) as dag:
     # Define the tasks in the DAG
@@ -57,3 +59,17 @@ with DAG(
 
     # Set task dependencies
     update_staging >> update_core 
+
+with DAG(
+    dag_id='data_quality',
+    default_args=default_args,
+    description='DAG to run data quality checks using Soda',
+    schedule_interval='0 16 * * *',  
+    catchup=False,
+) as dag:
+    # Define the tasks in the DAG
+    soda_validate_staging = yt_elt_data_quality(staging_schema)
+    soda_validate_core = yt_elt_data_quality(core_schema)
+
+    # Set task dependencies
+    soda_validate_staging >> soda_validate_core 

@@ -1,0 +1,20 @@
+# Checks for basic validations
+checks for video_tbl:
+  - missing_count(video_id) = 0
+  - duplicate_count(video_id) = 0
+
+  - likes_count_greater_than_vid_views = 0:
+      name: Likes count should not exceed video views
+      likes_count_greater_than_vid_views query: |
+        SELECT 
+            COUNT(video_id)
+        FROM video_tbl
+        WHERE video_likes_count > video_views
+
+  - comments_count_greater_than_vid_views = 0:
+      name: Comments count should not exceed video views
+      comments_count_greater_than_vid_views query: |
+        SELECT 
+            COUNT(video_id)
+        FROM video_tbl
+        WHERE comments_count > video_views
